@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storya — 你的故事</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Noto+Serif+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #0e0b1f;
+  --deep:      #13102a;
+  --void:      #1a1635;
+  --dusk:      #2a2550;
+  --violet:    #7c5cbf;
+  --lavender:  #a78bfa;
+  --rose:      #f472b6;
+  --gold:      #fbbf24;
+  --moon:      #e8e4ff;
+  --mist:      rgba(232,228,255,0.55);
+  --fog:       rgba(232,228,255,0.25);
+  --r: 16px;
+  --font-display: 'Noto Serif TC', serif;
+  --font-body: 'Nunito', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  background: var(--ink);
+  color: var(--moon);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── CANVAS BG ── */
+#cosmos { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(14,11,31,0.7);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(124,92,191,0.15);
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700;
+  color: var(--moon); letter-spacing: -0.5px;
+}
+.nav-logo em { color: var(--lavender); font-style: normal; }
+.nav-links { display: flex; align-items: center; gap: 24px; }
+.nav-links a {
+  font-size: 14px; color: var(--mist); text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--moon); }
+.btn { display: inline-flex; align-items: center; justify-content: center; border: none; cursor: pointer; font-family: var(--font-body); font-weight: 600; transition: all 0.2s; text-decoration: none; }
+.btn-ghost { background: rgba(124,92,191,0.15); color: var(--lavender); padding: 8px 20px; border-radius: 20px; font-size: 14px; border: 1px solid rgba(124,92,191,0.3); }
+.btn-ghost:hover { background: rgba(124,92,191,0.28); }
+.btn-primary { background: var(--violet); color: #fff; padding: 12px 28px; border-radius: 24px; font-size: 15px; }
+.btn-primary:hover { background: #9370d8; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,92,191,0.4); }
+.btn-lg { padding: 14px 36px; font-size: 16px; border-radius: 28px; }
+
+/* ── LAYOUT ── */
+.wrap { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 24px; }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 120px 24px 80px;
+}
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(167,139,250,0.12);
+  border: 1px solid rgba(167,139,250,0.25);
+  color: var(--lavender); font-size: 13px; font-weight: 600;
+  padding: 6px 16px; border-radius: 20px; margin-bottom: 28px;
+  letter-spacing: 0.3px;
+}
+.hero-eyebrow span { color: var(--gold); }
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(32px, 6vw, 58px);
+  font-weight: 700; line-height: 1.25;
+  letter-spacing: -0.5px; margin-bottom: 20px;
+}
+.hero h1 .accent { color: var(--lavender); }
+.hero h1 .accent2 { color: var(--rose); }
+.hero-sub {
+  font-size: clamp(15px, 2.5vw, 18px);
+  color: var(--mist); line-height: 1.7;
+  max-width: 520px; margin: 0 auto 36px;
+}
+.hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 56px; }
+.hero-preview {
+  width: 100%; max-width: 640px;
+  background: var(--deep);
+  border: 1px solid rgba(124,92,191,0.2);
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(167,139,250,0.08);
+}
+.preview-bar {
+  background: var(--void); padding: 12px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(124,92,191,0.1);
+}
+.preview-dots { display: flex; gap: 6px; }
+.preview-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.preview-dots span:nth-child(1) { background: #ff5f57; }
+.preview-dots span:nth-child(2) { background: #febc2e; }
+.preview-dots span:nth-child(3) { background: #28c840; }
+.preview-url { flex: 1; background: rgba(255,255,255,0.06); border-radius: 6px; padding: 4px 12px; font-size: 12px; color: var(--fog); text-align: center; }
+.preview-content { padding: 28px; }
+
+/* ── STORY CARD ── */
+.story-scene {
+  background: linear-gradient(135deg, #1e1040 0%, #2a1855 50%, #1a2040 100%);
+  border-radius: 14px; padding: 24px;
+  position: relative; overflow: hidden; margin-bottom: 20px;
+  min-height: 160px;
+}
+.story-scene-art { font-size: 48px; margin-bottom: 12px; display: block; }
+.story-scene-text {
+  font-family: var(--font-display);
+  font-size: 15px; line-height: 1.8; color: var(--moon);
+}
+.story-lang-toggle {
+  position: absolute; top: 14px; right: 14px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+  color: var(--mist); font-size: 12px; padding: 4px 10px; border-radius: 12px;
+  cursor: pointer; font-family: var(--font-body);
+}
+.story-voice-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(167,139,250,0.15);
+  border: 1px solid rgba(167,139,250,0.3);
+  color: var(--lavender); padding: 8px 16px; border-radius: 12px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  font-family: var(--font-body); margin-bottom: 16px;
+  transition: background 0.2s;
+}
+.story-voice-btn:hover { background: rgba(167,139,250,0.25); }
+.voice-wave { display: flex; align-items: center; gap: 3px; height: 18px; }
+.voice-wave span {
+  display: block; width: 3px; background: var(--lavender);
+  border-radius: 2px; animation: wave 1s ease-in-out infinite;
+}
+.voice-wave span:nth-child(1) { height: 8px; animation-delay: 0s; }
+.voice-wave span:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+.voice-wave span:nth-child(3) { height: 18px; animation-delay: 0.2s; }
+.voice-wave span:nth-child(4) { height: 12px; animation-delay: 0.3s; }
+.voice-wave span:nth-child(5) { height: 6px; animation-delay: 0.4s; }
+@keyframes wave { 0%,100%{ transform:scaleY(0.5); } 50%{ transform:scaleY(1); } }
+.story-choices { display: flex; flex-direction: column; gap: 8px; }
+.story-choice {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--moon); padding: 10px 16px; border-radius: 10px;
+  font-size: 13px; cursor: pointer; text-align: left;
+  font-family: var(--font-body); transition: all 0.2s;
+  display: flex; align-items: center; gap: 10px;
+}
+.story-choice:hover { background: rgba(124,92,191,0.2); border-color: rgba(167,139,250,0.4); }
+.story-choice-icon { font-size: 16px; }
+
+/* ── FEATURES ── */
+.section { padding: 80px 0; }
+.section-label {
+  font-size: 12px; font-weight: 700; letter-spacing: 2px;
+  color: var(--lavender); text-transform: uppercase; margin-bottom: 12px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(24px, 4vw, 38px); font-weight: 700;
+  line-height: 1.3; margin-bottom: 14px;
+}
+.section-sub { font-size: 16px; color: var(--mist); line-height: 1.7; max-width: 480px; }
+.features-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px; margin-top: 48px;
+}
+.feat-card {
+  background: var(--deep);
+  border: 1px solid rgba(124,92,191,0.15);
+  border-radius: var(--r); padding: 24px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.feat-card:hover { border-color: rgba(167,139,250,0.35); transform: translateY(-2px); }
+.feat-emoji { font-size: 28px; margin-bottom: 14px; display: block; }
+.feat-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; color: var(--moon); }
+.feat-desc { font-size: 13px; color: var(--mist); line-height: 1.6; }
+
+/* ── HOW IT WORKS ── */
+.how-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 0; margin-top: 48px; }
+.how-step { text-align: center; padding: 0 16px; position: relative; }
+.how-step:not(:last-child)::after {
+  content: ''; position: absolute; top: 28px; right: -1px;
+  width: 2px; height: 32px;
+  background: linear-gradient(to bottom, rgba(124,92,191,0.4), transparent);
+}
+.how-num {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), #9b6ee8);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px; font-size: 20px; font-weight: 800;
+  box-shadow: 0 0 24px rgba(124,92,191,0.4);
+}
+.how-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.how-desc { font-size: 12px; color: var(--mist); line-height: 1.6; }
+
+/* ── PRICING ── */
+.pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 16px; margin-top: 48px; }
+.price-card {
+  background: var(--deep); border: 1px solid rgba(124,92,191,0.15);
+  border-radius: var(--r); padding: 28px; position: relative;
+}
+.price-card.featured {
+  border-color: var(--violet);
+  box-shadow: 0 0 40px rgba(124,92,191,0.2);
+}
+.price-popular {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--violet), #9b6ee8);
+  color: #fff; font-size: 11px; font-weight: 700;
+  padding: 4px 14px; border-radius: 12px; white-space: nowrap;
+}
+.price-name { font-size: 14px; font-weight: 700; color: var(--mist); margin-bottom: 8px; }
+.price-amount { font-size: 36px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.price-amount sub { font-size: 14px; font-weight: 500; color: var(--mist); }
+.price-period { font-size: 13px; color: var(--mist); margin-bottom: 20px; }
+.price-divider { height: 1px; background: rgba(124,92,191,0.15); margin-bottom: 20px; }
+.price-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.price-features li { font-size: 13px; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+.price-features li::before { content: '✦'; color: var(--lavender); font-size: 10px; margin-top: 2px; flex-shrink: 0; }
+.price-features li.muted { color: var(--mist); }
+.price-features li.muted::before { color: rgba(167,139,250,0.3); }
+.btn-plan { width: 100%; padding: 11px; border-radius: 12px; font-size: 14px; font-weight: 700; cursor: pointer; border: none; font-family: var(--font-body); transition: all 0.2s; }
+.btn-plan-outline { background: transparent; border: 1px solid rgba(124,92,191,0.4); color: var(--lavender); }
+.btn-plan-outline:hover { background: rgba(124,92,191,0.15); }
+.btn-plan-filled { background: var(--violet); color: #fff; }
+.btn-plan-filled:hover { background: #9370d8; box-shadow: 0 4px 20px rgba(124,92,191,0.4); }
+
+/* ── VOICE SECTION ── */
+.voice-section {
+  background: linear-gradient(135deg, var(--void), var(--dusk));
+  border: 1px solid rgba(124,92,191,0.2);
+  border-radius: 20px; padding: 48px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center;
+}
+.voice-recorder {
+  background: var(--ink); border-radius: 14px; padding: 24px;
+  border: 1px solid rgba(124,92,191,0.2);
+}
+.recorder-title { font-size: 13px; font-weight: 700; color: var(--mist); margin-bottom: 16px; letter-spacing: 0.5px; }
+.recorder-visual {
+  height: 80px; background: rgba(124,92,191,0.08);
+  border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; gap: 4px; margin-bottom: 16px;
+  overflow: hidden;
+}
+.recorder-bar {
+  width: 4px; border-radius: 2px;
+  background: linear-gradient(to top, var(--violet), var(--lavender));
+  animation: recorder 0.8s ease-in-out infinite alternate;
+}
+@keyframes recorder { from { height: 12px; } to { height: 60px; } }
+.recorder-btn {
+  width: 100%; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  background: linear-gradient(90deg, var(--violet), #9b6ee8);
+  color: #fff; border: none; cursor: pointer; font-family: var(--font-body);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.recorder-hint { font-size: 12px; color: var(--fog); text-align: center; margin-top: 10px; }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid rgba(124,92,191,0.1);
+  padding: 40px 24px; text-align: center;
+}
+.footer-logo { font-family: var(--font-display); font-size: 18px; color: var(--mist); margin-bottom: 8px; }
+.footer-logo em { color: var(--lavender); font-style: normal; }
+.footer-copy { font-size: 12px; color: var(--fog); }
+
+/* ── MODAL ── */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(14,11,31,0.85); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--deep); border: 1px solid rgba(124,92,191,0.25);
+  border-radius: 20px; padding: 36px; max-width: 420px; width: 100%;
+  transform: translateY(16px); transition: transform 0.25s;
+  max-height: 90vh; overflow-y: auto;
+}
+.modal-backdrop.open .modal { transform: translateY(0); }
+.modal-title { font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.modal-sub { font-size: 14px; color: var(--mist); margin-bottom: 24px; line-height: 1.5; }
+.form-field { margin-bottom: 16px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--mist); margin-bottom: 6px; display: block; }
+.form-input {
+  width: 100%; padding: 11px 14px; border-radius: 10px;
+  background: var(--void); border: 1px solid rgba(124,92,191,0.25);
+  color: var(--moon); font-size: 14px; font-family: var(--font-body);
+  outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--violet); }
+.form-input::placeholder { color: var(--fog); }
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.08); border: none; color: var(--mist);
+  width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal { position: relative; }
+
+/* ── STORY READER ── */
+#story-reader { display: none; }
+.reader-wrap {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 100px 24px 60px;
+}
+.reader-card {
+  background: var(--deep); border: 1px solid rgba(124,92,191,0.2);
+  border-radius: 24px; max-width: 560px; width: 100%; overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
+}
+.reader-header {
+  background: linear-gradient(135deg, #1a1040, #2a1855);
+  padding: 32px 28px 24px;
+}
+.reader-chapter { font-size: 11px; letter-spacing: 2px; color: var(--lavender); font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+.reader-scene-art { font-size: 56px; display: block; margin-bottom: 16px; }
+.reader-text {
+  font-family: var(--font-display); font-size: 16px; line-height: 1.9;
+  color: var(--moon);
+}
+.reader-body { padding: 24px 28px 28px; }
+.reader-voice {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; cursor: pointer;
+  transition: background 0.2s;
+}
+.reader-voice:hover { background: rgba(167,139,250,0.18); }
+.reader-voice-label { font-size: 13px; color: var(--lavender); font-weight: 600; }
+.reader-lang {
+  margin-left: auto; font-size: 12px; color: var(--mist); cursor: pointer;
+  background: rgba(255,255,255,0.06); padding: 4px 10px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.1); font-family: var(--font-body);
+}
+.reader-choices-label { font-size: 12px; color: var(--mist); font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px; }
+.reader-choices { display: flex; flex-direction: column; gap: 8px; }
+.reader-choice {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  color: var(--moon); padding: 12px 16px; border-radius: 12px;
+  font-size: 14px; cursor: pointer; text-align: left;
+  font-family: var(--font-body); font-weight: 600; transition: all 0.2s;
+  display: flex; align-items: center; gap: 10px;
+}
+.reader-choice:hover { background: rgba(124,92,191,0.25); border-color: rgba(167,139,250,0.5); transform: translateX(4px); }
+.reader-progress { display: flex; gap: 6px; margin-bottom: 20px; }
+.prog-dot { flex: 1; height: 3px; border-radius: 2px; background: rgba(167,139,250,0.15); }
+.prog-dot.done { background: var(--lavender); }
+.prog-dot.current { background: var(--rose); }
+.back-btn { position: fixed; top: 80px; left: 24px; z-index: 50; background: rgba(14,11,31,0.7); backdrop-filter: blur(12px); border: 1px solid rgba(124,92,191,0.2); color: var(--mist); padding: 8px 16px; border-radius: 20px; font-size: 13px; cursor: pointer; font-family: var(--font-body); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+  nav { padding: 14px 20px; }
+  .nav-links a { display: none; }
+  .voice-section { grid-template-columns: 1fr; padding: 28px; gap: 24px; }
+  .how-step:not(:last-child)::after { display: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="cosmos"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Stor<em>ya</em></div>
+  <div class="nav-links">
+    <a href="#features">功能</a>
+    <a href="#how">如何開始</a>
+    <a href="#pricing">方案</a>
+    <button class="btn btn-ghost" onclick="openModal('login')">登入</button>
+    <button class="btn btn-primary" onclick="openModal('signup')" style="padding:8px 20px;font-size:14px;border-radius:20px;">免費試閱</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="landing">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">✦ <span>新</span> 現已支援繁體中文 · English</div>
+  <h1>用<span class="accent">爸爸媽媽</span>的聲音<br>說一個<span class="accent2">只屬於你</span>的故事</h1>
+  <p class="hero-sub">錄製 60 秒，AI 學習你的聲音。<br>每一本故事，從此都是你在說。</p>
+  <div class="hero-cta">
+    <button class="btn btn-primary btn-lg" onclick="openModal('signup')">免費試閱 3 本故事</button>
+    <button class="btn btn-ghost btn-lg" onclick="showReader()">看 Demo ↗</button>
+  </div>
+
+  <!-- PREVIEW WINDOW -->
+  <div class="hero-preview">
+    <div class="preview-bar">
+      <div class="preview-dots"><span></span><span></span><span></span></div>
+      <div class="preview-url">storya.app/read/forest-magic</div>
+    </div>
+    <div class="preview-content">
+      <div class="story-scene">
+        <button class="story-lang-toggle" onclick="togglePreviewLang(this)">EN</button>
+        <span class="story-scene-art">🌲</span>
+        <p class="story-scene-text" id="preview-text">
+          小星踏入了神奇的森林。每一片葉子都在輕輕唱歌，遠處有一道閃著銀光的小徑，像是在呼喚她的名字……
+        </p>
+      </div>
+      <button class="story-voice-btn">
+        <div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>
+        媽媽的聲音朗讀中…
+      </button>
+      <div class="story-choices">
+        <button class="story-choice" onclick="animateChoice(this)"><span class="story-choice-icon">✨</span>跟著銀光走</button>
+        <button class="story-choice" onclick="animateChoice(this)"><span class="story-choice-icon">🌙</span>爬上大樹看看</button>
+        <button class="story-choice" onclick="animateChoice(this)"><span class="story-choice-icon">🎵</span>坐下來聽葉子唱歌</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="wrap">
+    <div class="section-label">核心功能</div>
+    <h2 class="section-title">一個故事，無限種體驗</h2>
+    <p class="section-sub">把最珍貴的事物放進故事裡——你的聲音、你孩子的名字、你們共同的世界。</p>
+    <div class="features-grid">
+      <div class="feat-card">
+        <span class="feat-emoji">🎙️</span>
+        <div class="feat-title">父母聲音複製</div>
+        <div class="feat-desc">錄製 60 秒聲音樣本，AI 學習你獨特的音色、語調與溫度，所有故事從此都用你的聲音說。</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">🌟</span>
+        <div class="feat-title">個人化主角</div>
+        <div class="feat-desc">輸入孩子的名字、年齡與興趣，故事裡的主角就是他，冒險也為他量身打造。</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">🌏</span>
+        <div class="feat-title">中英雙語無縫切換</div>
+        <div class="feat-desc">每一頁都能即時切換繁體中文與英文，同一個故事，也是最自然的語言學習。</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">🎮</span>
+        <div class="feat-title">互動分支故事</div>
+        <div class="feat-desc">孩子做選擇，故事跟著走。每次閱讀都是新的冒險，好奇心永遠有地方去。</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">📖</span>
+        <div class="feat-title">每週更新故事庫</div>
+        <div class="feat-desc">跟著節氣、節日與孩子的成長持續更新。睡前故事，永遠有新的可以說。</div>
+      </div>
+      <div class="feat-card">
+        <span class="feat-emoji">📱</span>
+        <div class="feat-title">即開即用，不用下載</div>
+        <div class="feat-desc">純網頁設計，手機、平板、電腦都能用。睡前一秒開啟，不用找 App。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VOICE SECTION -->
+<section class="section" id="voice">
+  <div class="wrap">
+    <div class="voice-section">
+      <div>
+        <div class="section-label">聲音功能</div>
+        <h2 class="section-title" style="font-size:28px;">你的聲音，<br>是最好的睡前故事</h2>
+        <p style="font-size:15px;color:var(--mist);line-height:1.7;margin-top:12px;margin-bottom:24px;">研究顯示，孩子聽到熟悉聲音時，安全感顯著提升。即使你不在身邊，Storya 也能讓你的聲音陪著孩子入睡。</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="font-size:18px;margin-top:2px;">🎙️</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:3px;">錄製 60 秒聲音樣本</div>
+              <div style="font-size:13px;color:var(--mist);">照著提示朗讀幾個句子，AI 學習你的音色</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="font-size:18px;margin-top:2px;">✨</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:3px;">AI 生成你的聲音模型</div>
+              <div style="font-size:13px;color:var(--mist);">幾分鐘內完成，之後所有故事都用你的聲音</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="font-size:18px;margin-top:2px;">📖</span>
+            <div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:3px;">無限故事，同一個聲音</div>
+              <div style="font-size:13px;color:var(--mist);">新故事上架，你的聲音自動朗讀，不用重錄</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="voice-recorder">
+        <div class="recorder-title">聲音錄製 — 範例</div>
+        <div class="recorder-visual" id="recorder-visual">
+          <div style="color:var(--fog);font-size:13px;">按下開始錄製</div>
+        </div>
+        <div style="font-size:13px;color:var(--mist);line-height:1.6;background:rgba(124,92,191,0.08);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-family:var(--font-display);">
+          「月亮掛在窗外，星星數不清。今晚，讓我來說一個只屬於你的故事……」
+        </div>
+        <button class="recorder-btn" onclick="toggleRecorder(this)">
+          <span id="recorder-icon">🎙️</span>
+          <span id="recorder-label">開始錄製聲音</span>
+        </button>
+        <div class="recorder-hint">聲音樣本僅用於生成你的語音模型，不會公開或分享</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="wrap">
+    <div class="section-label">開始流程</div>
+    <h2 class="section-title">三步驟，五分鐘完成</h2>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">1</div>
+        <div class="how-title">建立孩子的故事檔案</div>
+        <div class="how-desc">輸入名字、年齡、喜歡的動物或顏色，故事為他量身打造</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">2</div>
+        <div class="how-title">錄製你的聲音</div>
+        <div class="how-desc">朗讀幾個引導句子，60 秒完成，AI 學習你的音色</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">3</div>
+        <div class="how-title">選一本故事，開始</div>
+        <div class="how-desc">孩子聽著你的聲音，在故事裡做選擇，冒險展開</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">4</div>
+        <div class="how-title">每週等待新故事</div>
+        <div class="how-desc">定期更新，你的聲音自動說新故事，不用重錄</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="section-label">訂閱方案</div>
+    <h2 class="section-title">選擇最適合你的方案</h2>
+    <p class="section-sub">先免費試閱，喜歡再訂閱。隨時可以取消。</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">試閱版</div>
+        <div class="price-amount">免費<sub></sub></div>
+        <div class="price-period">永久免費</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>3 本免費故事</li>
+          <li>中英雙語切換</li>
+          <li>互動分支體驗</li>
+          <li class="muted">父母聲音複製</li>
+          <li class="muted">個人化主角設定</li>
+          <li class="muted">每週新故事</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="openModal('signup')">免費開始</button>
+      </div>
+      <div class="price-card featured">
+        <div class="price-popular">最受家長喜愛</div>
+        <div class="price-name">家庭版</div>
+        <div class="price-amount">NT$349<sub>/月</sub></div>
+        <div class="price-period">首 14 天免費試用</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>無限故事庫存取</li>
+          <li>父母聲音複製</li>
+          <li>個人化主角設定</li>
+          <li>最多 3 位孩子檔案</li>
+          <li>每週 4 本新故事</li>
+          <li>中英雙語 + 成長報告</li>
+        </ul>
+        <button class="btn-plan btn-plan-filled" onclick="openModal('signup')">14 天免費試用</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">學校 / 機構版</div>
+        <div class="price-amount">NT$2,980<sub>/月</sub></div>
+        <div class="price-period">適合幼兒園、補習班</div>
+        <div class="price-divider"></div>
+        <ul class="price-features">
+          <li>無限學生帳號</li>
+          <li>教師管理後台</li>
+          <li>客製化故事主題</li>
+          <li>學習進度報告</li>
+          <li>優先客服支援</li>
+          <li>API 整合（洽談）</li>
+        </ul>
+        <button class="btn-plan btn-plan-outline" onclick="openModal('contact')">聯絡我們洽談</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Stor<em>ya</em></div>
+  <div class="footer-copy" style="margin-top:6px;">你的故事 · Your Story · © 2025 Storya</div>
+</footer>
+
+</div><!-- /landing -->
+
+<!-- STORY READER -->
+<div id="story-reader">
+  <button class="back-btn" onclick="hideReader()">← 返回</button>
+  <div class="reader-wrap">
+    <div class="reader-card">
+      <div class="reader-header">
+        <div class="reader-chapter" id="reader-chapter">第一章 · Chapter 1</div>
+        <span class="reader-scene-art" id="reader-art">🌲</span>
+        <p class="reader-text" id="reader-text">小星踏入了神奇的森林。陽光透過葉縫灑落，每一片葉子都在輕輕唱歌。遠處有一條閃著銀光的小路，像是在呼喚她的名字……</p>
+      </div>
+      <div class="reader-body">
+        <div class="reader-progress" id="reader-progress">
+          <div class="prog-dot current"></div>
+          <div class="prog-dot"></div>
+          <div class="prog-dot"></div>
+          <div class="prog-dot"></div>
+        </div>
+        <div class="reader-voice" onclick="playVoice()">
+          <div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="reader-voice-label">媽媽的聲音朗讀</div>
+          <button class="reader-lang" onclick="event.stopPropagation();toggleReaderLang()">EN</button>
+        </div>
+        <div class="reader-choices-label">你想要……</div>
+        <div class="reader-choices" id="reader-choices"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SIGNUP MODAL -->
+<div class="modal-backdrop" id="modal-signup">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('signup')">✕</button>
+    <div class="modal-title">開始你的故事 ✦</div>
+    <div class="modal-sub">免費試閱 3 本故事，不需要信用卡。</div>
+    <div class="form-field">
+      <label class="form-label">你的名字</label>
+      <input class="form-input" type="text" placeholder="爸爸 / 媽媽的名字">
+    </div>
+    <div class="form-field">
+      <label class="form-label">電子信箱</label>
+      <input class="form-input" type="email" placeholder="your@email.com">
+    </div>
+    <div class="form-field">
+      <label class="form-label">孩子的名字</label>
+      <input class="form-input" type="text" placeholder="小寶 / Mia…">
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;border-radius:12px;margin-top:8px;" onclick="closeModal('signup')">建立帳號，免費開始 →</button>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--fog);">已有帳號？<a href="#" style="color:var(--lavender);text-decoration:none;" onclick="switchModal('signup','login')">登入</a></div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-backdrop" id="modal-login">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('login')">✕</button>
+    <div class="modal-title">歡迎回來 ✦</div>
+    <div class="modal-sub">登入繼續你們的故事。</div>
+    <div class="form-field">
+      <label class="form-label">電子信箱</label>
+      <input class="form-input" type="email" placeholder="your@email.com">
+    </div>
+    <div class="form-field">
+      <label class="form-label">密碼</label>
+      <input class="form-input" type="password" placeholder="••••••••">
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;border-radius:12px;margin-top:8px;" onclick="closeModal('login')">登入</button>
+    <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--fog);">還沒有帳號？<a href="#" style="color:var(--lavender);text-decoration:none;" onclick="switchModal('login','signup')">免費試閱</a></div>
+  </div>
+</div>
+
+<!-- CONTACT MODAL -->
+<div class="modal-backdrop" id="modal-contact">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('contact')">✕</button>
+    <div class="modal-title">學校 / 機構合作</div>
+    <div class="modal-sub">告訴我們你的需求，我們會在 24 小時內回覆。</div>
+    <div class="form-field">
+      <label class="form-label">機構名稱</label>
+      <input class="form-input" type="text" placeholder="XX 幼兒園 / XX 補習班">
+    </div>
+    <div class="form-field">
+      <label class="form-label">聯絡人</label>
+      <input class="form-input" type="text" placeholder="姓名">
+    </div>
+    <div class="form-field">
+      <label class="form-label">電子信箱</label>
+      <input class="form-input" type="email" placeholder="contact@school.edu.tw">
+    </div>
+    <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;border-radius:12px;margin-top:8px;" onclick="closeModal('contact')">送出詢問</button>
+  </div>
+</div>
+
+<script>
+// ── COSMOS BACKGROUND ──
+const cv = document.getElementById('cosmos');
+const ctx2 = cv.getContext('2d');
+let W2, H2, stars2 = [], nebulas = [];
+
+function resize(){
+  W2 = cv.width = window.innerWidth;
+  H2 = cv.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+for(let i=0;i<180;i++) stars2.push({
+  x:Math.random(), y:Math.random(),
+  r:Math.random()*1.4+0.2,
+  o:Math.random()*0.7+0.1,
+  sp:Math.random()*0.003+0.001
+});
+for(let i=0;i<4;i++) nebulas.push({
+  x:Math.random(), y:Math.random(),
+  r:Math.random()*200+120,
+  hue: [260,280,240,300][i],
+  o: Math.random()*0.06+0.03
+});
+
+function drawCosmos(t){
+  ctx2.clearRect(0,0,W2,H2);
+  nebulas.forEach(n=>{
+    const grd = ctx2.createRadialGradient(n.x*W2,n.y*H2,0,n.x*W2,n.y*H2,n.r);
+    grd.addColorStop(0,`hsla(${n.hue},60%,40%,${n.o})`);
+    grd.addColorStop(1,'transparent');
+    ctx2.fillStyle=grd;
+    ctx2.beginPath(); ctx2.arc(n.x*W2,n.y*H2,n.r,0,Math.PI*2); ctx2.fill();
+  });
+  stars2.forEach((s,i)=>{
+    const pulse = Math.sin(t*s.sp*60+i)*0.3+0.7;
+    ctx2.fillStyle=`rgba(232,228,255,${s.o*pulse})`;
+    ctx2.beginPath(); ctx2.arc(s.x*W2,s.y*H2,s.r,0,Math.PI*2); ctx2.fill();
+  });
+  requestAnimationFrame(drawCosmos);
+}
+requestAnimationFrame(drawCosmos);
+
+// ── STORY DATA ──
+const stories = [
+  { id:'s1', art:'🌲', chapter:'第一章 · Chapter 1',
+    zh:'小星踏入了神奇的森林。陽光透過葉縫灑落，每一片葉子都在輕輕唱歌。遠處有一條閃著銀光的小路，像是在呼喚她的名字……',
+    en:'Little Star stepped into the magical forest. Sunlight filtered through the leaves, and every leaf hummed a gentle song. Far ahead, a silver path glimmered — as if calling her name…',
+    choices:[{icon:'✨',zh:'跟著銀光走',en:'Follow the silver light',next:'s2a'},{icon:'🌙',zh:'爬上大樹看看',en:'Climb the great tree',next:'s2b'},{icon:'🎵',zh:'坐下來聽葉子唱歌',en:'Sit and listen to the leaves',next:'s2c'}]
+  },
+  { id:'s2a', art:'🌟', chapter:'第二章 · Chapter 2',
+    zh:'銀光把小星帶到了一個小小的精靈村莊！矮小的精靈們戴著露珠做的帽子，看見小星，他們高興地拍起手來。「你終於來了！」精靈女王說，「我們需要你的幫助……」',
+    en:'The silver light led Little Star to a tiny fairy village! Small fairies wearing dewdrop hats clapped their hands with joy. "You\'ve finally arrived!" said the Fairy Queen. "We need your help…"',
+    choices:[{icon:'👑',zh:'問精靈女王需要什麼幫助',en:'Ask what help is needed',next:'s3'},{icon:'🏡',zh:'先參觀精靈村莊',en:'Explore the village first',next:'s3'}]
+  },
+  { id:'s2b', art:'🌳', chapter:'第二章 · Chapter 2',
+    zh:'小星爬上了最高的大樹。從上面往下看，整片森林像是一張綠色的地毯。突然，她看見遠方有一道彩虹橋——橋的那頭有什麼東西在發光……',
+    en:'Little Star climbed to the top of the tallest tree. The whole forest looked like a green carpet below. Suddenly, she spotted a rainbow bridge in the distance — something was glowing on the other side…',
+    choices:[{icon:'🌈',zh:'沿著彩虹橋走過去',en:'Cross the rainbow bridge',next:'s3'},{icon:'🔭',zh:'在樹上繼續觀察',en:'Keep watching from the tree',next:'s3'}]
+  },
+  { id:'s2c', art:'🎶', chapter:'第二章 · Chapter 2',
+    zh:'小星靜靜地坐下來。葉子們的歌聲越來越清晰，她聽懂了——原來是一首古老的魔法咒語！只要唱出來，就能召喚守護森林的精靈……',
+    en:'Little Star sat quietly. The song of the leaves grew clearer, and she began to understand — it was an ancient magic spell! Singing it aloud would summon the guardian spirit of the forest…',
+    choices:[{icon:'🎤',zh:'試著唱出咒語',en:'Try to sing the spell',next:'s3'},{icon:'📝',zh:'先把咒語記下來',en:'Write down the spell first',next:'s3'}]
+  },
+  { id:'s3', art:'🌙', chapter:'第三章 · Chapter 3',
+    zh:'就在這一刻，整片森林亮了起來。無數顆星星從樹梢落下，化成溫柔的光，包圍著小星。她知道，這個故事才剛剛開始……',
+    en:'At that very moment, the whole forest lit up. Countless stars fell from the treetops and turned into gentle lights, surrounding Little Star. She knew — this story was only just beginning…',
+    choices:[{icon:'🔄',zh:'再讀一次這個故事',en:'Read this story again',next:'s1'},{icon:'📚',zh:'選另一個故事',en:'Choose another story',next:'s1'}]
+  }
+];
+
+let currentLang = 'zh';
+let currentStory = stories[0];
+
+function getStory(id){ return stories.find(s=>s.id===id)||stories[0]; }
+
+function renderReader(){
+  document.getElementById('reader-art').textContent = currentStory.art;
+  document.getElementById('reader-chapter').textContent = currentStory.chapter;
+  document.getElementById('reader-text').textContent = currentStory[currentLang];
+  const choicesEl = document.getElementById('reader-choices');
+  choicesEl.innerHTML = '';
+  currentStory.choices.forEach(c=>{
+    const btn = document.createElement('button');
+    btn.className = 'reader-choice';
+    btn.innerHTML = `<span style="font-size:18px">${c.icon}</span>${c[currentLang]}`;
+    btn.onclick = ()=>{ currentStory = getStory(c.next); renderReader(); };
+    choicesEl.appendChild(btn);
+  });
+}
+
+function showReader(){
+  document.getElementById('landing').style.display='none';
+  document.getElementById('story-reader').style.display='block';
+  currentStory = stories[0]; currentLang='zh';
+  renderReader();
+  window.scrollTo(0,0);
+}
+function hideReader(){
+  document.getElementById('story-reader').style.display='none';
+  document.getElementById('landing').style.display='block';
+}
+function toggleReaderLang(){
+  currentLang = currentLang==='zh'?'en':'zh';
+  document.querySelector('.reader-lang').textContent = currentLang==='zh'?'EN':'中';
+  renderReader();
+}
+
+// ── PREVIEW LANG TOGGLE ──
+const previewTexts = {
+  zh:'小星踏入了神奇的森林。每一片葉子都在輕輕唱歌，遠處有一道閃著銀光的小徑，像是在呼喚她的名字……',
+  en:'Little Star stepped into the magical forest. Every leaf sang softly, and far ahead, a silver path glimmered — calling her name…'
+};
+let previewLang='zh';
+function togglePreviewLang(btn){
+  previewLang = previewLang==='zh'?'en':'zh';
+  btn.textContent = previewLang==='zh'?'EN':'中';
+  document.getElementById('preview-text').textContent = previewTexts[previewLang];
+}
+
+function animateChoice(btn){
+  btn.style.background='rgba(124,92,191,0.35)';
+  btn.style.borderColor='rgba(167,139,250,0.6)';
+  setTimeout(()=>{btn.style.background='';btn.style.borderColor='';},600);
+}
+
+// ── RECORDER ──
+let recording=false;
+function toggleRecorder(btn){
+  recording=!recording;
+  const vis=document.getElementById('recorder-visual');
+  const icon=document.getElementById('recorder-icon');
+  const label=document.getElementById('recorder-label');
+  if(recording){
+    icon.textContent='⏹️'; label.textContent='停止錄製';
+    vis.innerHTML='';
+    for(let i=0;i<18;i++){
+      const bar=document.createElement('div');
+      bar.className='recorder-bar';
+      bar.style.animationDelay=(i*0.05)+'s';
+      bar.style.animationDuration=(0.6+Math.random()*0.4)+'s';
+      vis.appendChild(bar);
+    }
+  } else {
+    icon.textContent='✓'; label.textContent='聲音樣本已儲存！';
+    btn.style.background='linear-gradient(90deg,#16a34a,#22c55e)';
+    vis.innerHTML='<div style="color:#86efac;font-size:13px;font-weight:600;">✦ 錄製完成，AI 學習中…</div>';
+    setTimeout(()=>{ icon.textContent='🎙️'; label.textContent='重新錄製'; btn.style.background=''; },3000);
+  }
+}
+
+function playVoice(){ /* TTS integration point */ }
+
+// ── MODALS ──
+function openModal(id){
+  document.getElementById('modal-'+id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById('modal-'+id).classList.remove('open');
+}
+function switchModal(from,to){
+  closeModal(from); openModal(to);
+}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open')); });
+</script>
+</body>
+</html>
