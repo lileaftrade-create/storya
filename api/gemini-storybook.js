@@ -1,18 +1,22 @@
 // api/gemini-storybook.js
 // Vercel serverless function - 安全調用 Gemini API
-// 部署到 /api/gemini-storybook.js
-
-const fetch = require('node-fetch');
-
-// 使用環境變數存放 API 密鑰
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 export default async function handler(req, res) {
-  // 只允許 POST
+  // 1. 確保只允許 POST 方法
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // 抓取 Vercel 後台設定的環境變數
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  
+  if (!GEMINI_API_KEY) {
+    console.error("夭壽！抓不到 API Key，請檢查 Vercel 環境變數設定！");
+    return res.status(500).json({ error: 'Missing API Key' });
+  }
+
+  // 🛑 修正點：API Key 必須直接塞進網址裡！（這邊幫你用最穩定的 1.5-flash 模型）
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   try {
     const { action, childName, childAge, interests, emotion, action_desc } = req.body;
@@ -48,8 +52,15 @@ export default async function handler(req, res) {
             maxOutputTokens: 200,
           },
         }),
-        params: { key: GEMINI_API_KEY },
+        // ❌ 這裡原本的 params 已被移除，因為 fetch 不吃這套
       });
+
+      // 如果 Google 拒絕了我們，把錯誤印在後台
+      if (!response.ok) {
+        const errLog = await response.text();
+        console.error("Gemini API 報錯啦:", errLog);
+        throw new Error(`Google AI 拒絕了請求，狀態碼：${response.status}`);
+      }
 
       const data = await response.json();
       const storyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '故事生成失敗';
@@ -57,59 +68,16 @@ export default async function handler(req, res) {
       return res.status(200).json({ story: storyText });
     }
 
-    // 2️⃣ 生成角色動作序列圖像
+    // 2️⃣ 角色動作序列圖像（防呆處理）
+    // 💡 提醒：Gemini 的 generateContent 端點是只能產文字的，如果直接拿來產圖會報錯喔！
+    // 這裡我先幫你放個防呆機制，讓前端動畫能先繼續跑完流程
     if (action === 'generateCharacterAnimation') {
-      // 生成 5 張連續幀的提示詞
-      const frames = [
-        '開始狀態',
-        '進行中第1步',
-        '進行中第2步',
-        '高潮',
-        '結束狀態',
-      ];
-
-      const images = [];
-
-      for (let i = 0; i < frames.length; i++) {
-        const framePrompt = `
-A modern vector art children's book illustration of a 5-year-old girl Star in a fantasy forest. 
-She is ${action_desc} and feeling ${emotion}.
-Frame ${i + 1}/5: ${frames[i]}.
-Style: flat design with subtle gradients for depth, clean geometric shapes, limited color palette (teals, oranges, glowing yellows), minimalistic character design, high contrast, bold and clean. Suitable for a very young audience. Wide angle.
-`;
-
-        try {
-          const imgResponse = await fetch(GEMINI_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: framePrompt }] }],
-              generationConfig: {
-                temperature: 0.7,
-              },
-            }),
-            params: { key: GEMINI_API_KEY },
-          });
-
-          const imgData = await imgResponse.json();
-          // 這裡應該返回圖像 data，但 Gemini 可能返回 URL 或 base64
-          // 根據實際 Gemini API 返回格式調整
-          images.push({
-            frame: i + 1,
-            description: framePrompt,
-            // 實際圖像數據會從 Gemini 返回
-          });
-        } catch (err) {
-          console.error(`Frame ${i + 1} generation error:`, err);
-        }
-      }
-
-      return res.status(200).json({ images });
+      return res.status(200).json({ images: [] });
     }
 
     return res.status(400).json({ error: 'Unknown action' });
   } catch (error) {
-    console.error('Gemini API error:', error);
+    console.error('後端大爆炸:', error);
     return res.status(500).json({ error: error.message });
   }
 }
