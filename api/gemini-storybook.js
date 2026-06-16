@@ -1,22 +1,21 @@
 // api/gemini-storybook.js
-// Vercel serverless function - 安全調用 Gemini API
+// 披著 Gemini 外皮，但骨子裡是 Groq (Llama 3) 的後端！🤣
 
 export default async function handler(req, res) {
-  // 1. 確保只允許 POST 方法
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // 抓取 Vercel 後台設定的環境變數
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+  // 抓取 Vercel 後台設定的 GROQ 鑰匙
+  const GROQ_API_KEY = process.env.GROQ_API_KEY;
   
-  if (!GEMINI_API_KEY) {
-    console.error("抓不到 API Key，請檢查 Vercel 環境變數設定！");
-    return res.status(500).json({ error: 'Missing API Key' });
+  if (!GROQ_API_KEY) {
+    console.error("老大！找不到 GROQ_API_KEY，你是不是忘記去 Vercel 設定了？");
+    return res.status(500).json({ error: 'Missing Groq API Key' });
   }
 
-  // ✅ 直接使用 2.0-flash 模型，並把金鑰放在網址參數中
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+  // Groq 的 API 網址 (跟 OpenAI 的格式一模一樣，超好串)
+  const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
   try {
     const { action, childName, childAge, interests } = req.body;
@@ -35,35 +34,35 @@ export default async function handler(req, res) {
 - 讓 ${childName} 成為主角
 - 包含奇幻冒險元素
 - 適合 ${childAge} 歲的小朋友
-- 為下一步的選擇（動作 + 情緒）埋下伏筆
+- 為下一步的選擇埋下伏筆
+- ⚠️ 強烈要求：必須完全使用「繁體中文（台灣習慣用語）」回覆！
 
-回應格式：只返回故事文本，不要任何額外說明。
+回應格式：只返回故事文本，不要任何打招呼或額外說明。
 `;
 
-      // 直接使用 Node.js 內建的 fetch，不需要 require('node-fetch')
-      const response = await fetch(GEMINI_API_URL, {
+      const response = await fetch(GROQ_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${GROQ_API_KEY}` // Groq 規定鑰匙要放這裡
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: storyPrompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 200,
-          },
+          model: "llama-3.3-70b-versatile", // 使用地表最強大的開源模型之一！
+          messages: [{ role: "user", content: storyPrompt }],
+          temperature: 0.7,
+          max_tokens: 300,
         }),
       });
 
-      // 檢查 Google API 是否有報錯
       if (!response.ok) {
         const errLog = await response.text();
-        console.error("Gemini API 報錯:", errLog);
-        throw new Error(`Google AI 拒絕了請求，狀態碼：${response.status}`);
+        console.error("Groq 罷工啦:", errLog);
+        throw new Error(`Groq 拒絕請求，狀態碼：${response.status}`);
       }
 
       const data = await response.json();
-      const storyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '故事生成失敗';
+      // Groq 回傳的格式跟 Gemini 不一樣，這邊幫你抓對位置了
+      const storyText = data?.choices?.[0]?.message?.content || '故事生成失敗';
 
       return res.status(200).json({ story: storyText });
     }
