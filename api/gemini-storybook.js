@@ -11,15 +11,15 @@ export default async function handler(req, res) {
   const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
   
   if (!GEMINI_API_KEY) {
-    console.error("夭壽！抓不到 API Key，請檢查 Vercel 環境變數設定！");
+    console.error("抓不到 API Key，請檢查 Vercel 環境變數設定！");
     return res.status(500).json({ error: 'Missing API Key' });
   }
 
-  // 🛑 修正點：API Key 必須直接塞進網址裡！（這邊幫你用最穩定的 1.5-flash 模型）
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+  // ✅ 直接使用 2.0-flash 模型，並把金鑰放在網址參數中
+  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
   try {
-    const { action, childName, childAge, interests, emotion, action_desc } = req.body;
+    const { action, childName, childAge, interests } = req.body;
 
     // 1️⃣ 生成故事內容
     if (action === 'generateStory') {
@@ -40,6 +40,7 @@ export default async function handler(req, res) {
 回應格式：只返回故事文本，不要任何額外說明。
 `;
 
+      // 直接使用 Node.js 內建的 fetch，不需要 require('node-fetch')
       const response = await fetch(GEMINI_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,13 +53,12 @@ export default async function handler(req, res) {
             maxOutputTokens: 200,
           },
         }),
-        // ❌ 這裡原本的 params 已被移除，因為 fetch 不吃這套
       });
 
-      // 如果 Google 拒絕了我們，把錯誤印在後台
+      // 檢查 Google API 是否有報錯
       if (!response.ok) {
         const errLog = await response.text();
-        console.error("Gemini API 報錯啦:", errLog);
+        console.error("Gemini API 報錯:", errLog);
         throw new Error(`Google AI 拒絕了請求，狀態碼：${response.status}`);
       }
 
@@ -69,8 +69,6 @@ export default async function handler(req, res) {
     }
 
     // 2️⃣ 角色動作序列圖像（防呆處理）
-    // 💡 提醒：Gemini 的 generateContent 端點是只能產文字的，如果直接拿來產圖會報錯喔！
-    // 這裡我先幫你放個防呆機制，讓前端動畫能先繼續跑完流程
     if (action === 'generateCharacterAnimation') {
       return res.status(200).json({ images: [] });
     }
