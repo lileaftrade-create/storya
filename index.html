@@ -885,5 +885,631 @@ document.querySelectorAll('.modal-backdrop').forEach(m=>{
 });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-backdrop.open').forEach(m=>m.classList.remove('open')); });
 </script>
+<!-- 粘貼 storybook-generator.html 中的所有內容 -->
+  <!-- ===== STORYBOOK GENERATOR MODULE ===== -->
+<!-- 這個模塊可以集成到現有的 Storya index.html 中 -->
+
+<style>
+/* ── 生成器容器 ── */
+#storybook-generator {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(14, 11, 31, 0.95);
+  backdrop-filter: blur(20px);
+  display: none;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+#storybook-generator.open { display: flex; }
+
+.generator-wrapper {
+  background: var(--deep);
+  border: 1px solid rgba(124, 92, 191, 0.2);
+  border-radius: 20px;
+  padding: 40px;
+  max-width: 600px;
+  width: 100%;
+  position: relative;
+}
+
+.generator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.generator-title {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--moon);
+}
+
+.generator-close {
+  background: none; border: none;
+  font-size: 24px; color: var(--mist);
+  cursor: pointer; transition: color 0.2s;
+}
+
+.generator-close:hover { color: var(--moon); }
+
+/* ── 表單步驟 ── */
+.generator-step {
+  display: none;
+}
+
+.generator-step.active { display: block; animation: fadeIn 0.3s ease-in; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lavender);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(124, 92, 191, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--moon);
+  transition: all 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+/* ── 情緒和動作選擇 ── */
+.emotion-grid, .action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.emotion-btn, .action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(124, 92, 191, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  font-family: var(--font-body);
+  color: var(--moon);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.emotion-btn:hover, .action-btn:hover {
+  background: rgba(124, 92, 191, 0.15);
+  border-color: rgba(167, 139, 250, 0.4);
+}
+
+.emotion-btn.selected, .action-btn.selected {
+  background: linear-gradient(135deg, rgba(124, 92, 191, 0.3), rgba(167, 139, 250, 0.2));
+  border-color: var(--lavender);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.3);
+}
+
+/* ── 動畫播放區 ── */
+#animation-preview {
+  width: 100%;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(26, 22, 64, 0.5), rgba(42, 37, 80, 0.5));
+  border: 1px solid rgba(124, 92, 191, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 24px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.frame-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.frame {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: frameLoop 3s steps(5, end) infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+@keyframes frameLoop {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  40% { opacity: 1; }
+  60% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.frame:nth-child(1) { animation-delay: 0s; }
+.frame:nth-child(2) { animation-delay: -0.6s; }
+.frame:nth-child(3) { animation-delay: -1.2s; }
+.frame:nth-child(4) { animation-delay: -1.8s; }
+.frame:nth-child(5) { animation-delay: -2.4s; }
+
+.loading-spinner {
+  display: none;
+  text-align: center;
+  color: var(--lavender);
+}
+
+.loading-spinner.active { display: block; }
+
+.spinner {
+  border: 3px solid rgba(167, 139, 250, 0.2);
+  border-top: 3px solid var(--lavender);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* ── 按鈕組 ── */
+.button-group {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--mist);
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-family: var(--font-body);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--moon);
+}
+
+/* ── 進度指示 ── */
+.progress-indicator {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  justify-content: center;
+}
+
+.progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(167, 139, 250, 0.2);
+  transition: all 0.3s;
+}
+
+.progress-dot.active {
+  background: var(--lavender);
+  width: 24px;
+  border-radius: 4px;
+}
+
+/* ── 故事預覽 ── */
+.story-preview-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--mist);
+  min-height: 60px;
+}
+
+.story-preview-box.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+</style>
+
+<!-- HTML 結構 -->
+<div id="storybook-generator">
+  <div class="generator-wrapper">
+    <!-- 標題 -->
+    <div class="generator-header">
+      <div class="generator-title">✨ 為我創建故事</div>
+      <button class="generator-close" onclick="closeStorybookGenerator()">✕</button>
+    </div>
+
+    <!-- 進度指示 -->
+    <div class="progress-indicator">
+      <div class="progress-dot active" id="dot-1"></div>
+      <div class="progress-dot" id="dot-2"></div>
+      <div class="progress-dot" id="dot-3"></div>
+      <div class="progress-dot" id="dot-4"></div>
+    </div>
+
+    <!-- 步驟 1: 孩子信息 -->
+    <div class="generator-step active" id="step-1">
+      <div class="form-group">
+        <label class="form-label">小朋友的名字</label>
+        <input type="text" class="form-input" id="input-name" placeholder="例：小星">
+      </div>
+      <div class="form-group">
+        <label class="form-label">年齡</label>
+        <input type="number" class="form-input" id="input-age" placeholder="例：5" min="2" max="12">
+      </div>
+      <div class="form-group">
+        <label class="form-label">興趣 / 喜歡的東西</label>
+        <input type="text" class="form-input" id="input-interests" placeholder="例：恐龍、魔法、太空">
+      </div>
+
+      <div class="button-group">
+        <button class="btn btn-primary" style="width: 100%;" onclick="nextGeneratorStep()">
+          下一步 →
+        </button>
+      </div>
+    </div>
+
+    <!-- 步驟 2: 故事生成 -->
+    <div class="generator-step" id="step-2">
+      <div style="text-align: center; margin-bottom: 20px;">
+        <div style="font-size: 18px; font-weight: 600; color: var(--lavender); margin-bottom: 8px;">
+          正在生成您的故事...
+        </div>
+      </div>
+
+      <div id="story-loading" class="loading-spinner active">
+        <div class="spinner"></div>
+        <div>AI 正在為 <span id="story-child-name">小朋友</span> 創作一個獨特的故事…</div>
+      </div>
+
+      <div id="story-preview" class="story-preview-box loading"></div>
+
+      <div class="button-group">
+        <button class="btn-secondary" onclick="prevGeneratorStep()">← 上一步</button>
+        <button class="btn btn-primary" onclick="nextGeneratorStep()" id="btn-next-emotion">
+          下一步 →
+        </button>
+      </div>
+    </div>
+
+    <!-- 步驟 3: 選擇情緒 -->
+    <div class="generator-step" id="step-3">
+      <div style="margin-bottom: 24px;">
+        <label class="form-label" style="margin-bottom: 16px;">小星現在是什麼情緒？</label>
+        <div class="emotion-grid">
+          <button class="emotion-btn" onclick="selectEmotion(this, 'happy')">
+            <div style="font-size: 28px;">😊</div>
+            <div style="margin-top: 8px; font-size: 12px;">開心</div>
+          </button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'excited')">
+            <div style="font-size: 28px;">🤩</div>
+            <div style="margin-top: 8px; font-size: 12px;">興奮</div>
+          </button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'curious')">
+            <div style="font-size: 28px;">🤔</div>
+            <div style="margin-top: 8px; font-size: 12px;">好奇</div>
+          </button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'scared')">
+            <div style="font-size: 28px;">😨</div>
+            <div style="margin-top: 8px; font-size: 12px;">害怕</div>
+          </button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'sad')">
+            <div style="font-size: 28px;">😢</div>
+            <div style="margin-top: 8px; font-size: 12px;">難過</div>
+          </button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'thinking')">
+            <div style="font-size: 28px;">💭</div>
+            <div style="margin-top: 8px; font-size: 12px;">思考</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" onclick="prevGeneratorStep()">← 上一步</button>
+        <button class="btn btn-primary" onclick="nextGeneratorStep()" id="btn-next-action">
+          下一步 →
+        </button>
+      </div>
+    </div>
+
+    <!-- 步驟 4: 選擇動作 -->
+    <div class="generator-step" id="step-4">
+      <div style="margin-bottom: 24px;">
+        <label class="form-label" style="margin-bottom: 16px;">小星在做什麼動作？</label>
+        <div class="action-grid">
+          <button class="action-btn" onclick="selectAction(this, 'jumping')">
+            <div style="font-size: 28px;">🦘</div>
+            <div style="margin-top: 8px; font-size: 12px;">跳躍</div>
+          </button>
+          <button class="action-btn" onclick="selectAction(this, 'pointing')">
+            <div style="font-size: 28px;">☝️</div>
+            <div style="margin-top: 8px; font-size: 12px;">指向</div>
+          </button>
+          <button class="action-btn" onclick="selectAction(this, 'running')">
+            <div style="font-size: 28px;">🏃</div>
+            <div style="margin-top: 8px; font-size: 12px;">跑步</div>
+          </button>
+          <button class="action-btn" onclick="selectAction(this, 'dancing')">
+            <div style="font-size: 28px;">💃</div>
+            <div style="margin-top: 8px; font-size: 12px;">跳舞</div>
+          </button>
+          <button class="action-btn" onclick="selectAction(this, 'waving')">
+            <div style="font-size: 28px;">👋</div>
+            <div style="margin-top: 8px; font-size: 12px;">揮手</div>
+          </button>
+          <button class="action-btn" onclick="selectAction(this, 'laughing')">
+            <div style="font-size: 28px;">😄</div>
+            <div style="margin-top: 8px; font-size: 12px;">大笑</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- 動畫預覽 -->
+      <div style="margin-bottom: 20px;">
+        <label class="form-label">動畫預覽</label>
+        <div id="animation-preview">
+          <div class="loading-spinner" id="anim-loading">
+            <div class="spinner"></div>
+            <div>正在生成角色動畫…</div>
+          </div>
+          <div class="frame-container" id="frame-container"></div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="btn-secondary" onclick="prevGeneratorStep()">← 上一步</button>
+        <button class="btn btn-primary" onclick="completeGenerator()" style="width: 100%;">
+          完成並開始閱讀 🎉
+        </button>
+        <button class="btn btn-primary" onclick="openStorybookGenerator()">
+  ✨ 為我創建故事
+</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript 邏輯 -->
+<script>
+let generatorState = {
+  currentStep: 1,
+  childName: '',
+  childAge: '',
+  interests: '',
+  selectedEmotion: '',
+  selectedAction: '',
+  story: '',
+};
+
+const emotionMap = {
+  happy: '開心',
+  excited: '興奮',
+  curious: '好奇',
+  scared: '害怕',
+  sad: '難過',
+  thinking: '思考中',
+};
+
+const actionMap = {
+  jumping: '跳躍',
+  pointing: '指向',
+  running: '跑步',
+  dancing: '跳舞',
+  waving: '揮手',
+  laughing: '大笑',
+};
+
+function openStorybookGenerator() {
+  document.getElementById('storybook-generator').classList.add('open');
+}
+
+function closeStorybookGenerator() {
+  document.getElementById('storybook-generator').classList.remove('open');
+}
+
+function updateProgressDots() {
+  for (let i = 1; i <= 4; i++) {
+    const dot = document.getElementById(`dot-${i}`);
+    if (i === generatorState.currentStep) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  }
+}
+
+function showStep(stepNum) {
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById(`step-${i}`).classList.remove('active');
+  }
+  document.getElementById(`step-${stepNum}`).classList.add('active');
+  updateProgressDots();
+}
+
+function nextGeneratorStep() {
+  if (generatorState.currentStep === 1) {
+    // 驗證第一步
+    generatorState.childName = document.getElementById('input-name').value;
+    generatorState.childAge = document.getElementById('input-age').value;
+    generatorState.interests = document.getElementById('input-interests').value;
+
+    if (!generatorState.childName || !generatorState.childAge) {
+      alert('請輸入小朋友的名字和年齡');
+      return;
+    }
+
+    generatorState.currentStep = 2;
+    showStep(2);
+
+    // 開始生成故事
+    generateStory();
+  } else if (generatorState.currentStep === 2) {
+    if (!generatorState.story) {
+      alert('故事還在生成中，請稍候...');
+      return;
+    }
+    generatorState.currentStep = 3;
+    showStep(3);
+  } else if (generatorState.currentStep === 3) {
+    if (!generatorState.selectedEmotion) {
+      alert('請選擇一個情緒');
+      return;
+    }
+    generatorState.currentStep = 4;
+    showStep(4);
+  }
+}
+
+function prevGeneratorStep() {
+  if (generatorState.currentStep > 1) {
+    generatorState.currentStep--;
+    showStep(generatorState.currentStep);
+  }
+}
+
+function selectEmotion(btn, emotion) {
+  document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  generatorState.selectedEmotion = emotion;
+}
+
+function selectAction(btn, action) {
+  document.querySelectorAll('.action-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  generatorState.selectedAction = action;
+
+  // 生成動畫
+  generateAnimation();
+}
+
+async function generateStory() {
+  try {
+    const response = await fetch('/api/gemini-storybook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generateStory',
+        childName: generatorState.childName,
+        childAge: generatorState.childAge,
+        interests: generatorState.interests,
+      }),
+    });
+
+    const data = await response.json();
+    if (data.story) {
+      generatorState.story = data.story;
+      document.getElementById('story-preview').textContent = data.story;
+      document.getElementById('story-preview').classList.remove('loading');
+      document.getElementById('story-loading').classList.remove('active');
+      document.getElementById('btn-next-emotion').disabled = false;
+    }
+  } catch (error) {
+    console.error('Story generation error:', error);
+    document.getElementById('story-preview').textContent = '故事生成失敗，請重試';
+  }
+}
+
+async function generateAnimation() {
+  const container = document.getElementById('frame-container');
+  const loading = document.getElementById('anim-loading');
+
+  loading.classList.add('active');
+  container.innerHTML = '';
+
+  try {
+    const response = await fetch('/api/gemini-storybook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generateCharacterAnimation',
+        emotion: generatorState.selectedEmotion,
+        action_desc: actionMap[generatorState.selectedAction],
+      }),
+    });
+
+    const data = await response.json();
+
+    // 為每一幀創建元素（示例：使用占位符）
+    for (let i = 0; i < 5; i++) {
+      const frame = document.createElement('div');
+      frame.className = 'frame';
+      frame.style.backgroundColor = `rgba(124, 92, 191, ${0.1 + i * 0.05})`;
+      frame.textContent = `幀 ${i + 1}`;
+      frame.style.fontSize = '18px';
+      frame.style.color = 'var(--lavender)';
+      container.appendChild(frame);
+    }
+
+    loading.classList.remove('active');
+  } catch (error) {
+    console.error('Animation generation error:', error);
+    loading.innerHTML = '<div>動畫生成失敗</div>';
+  }
+}
+
+function completeGenerator() {
+  // 合成故事和動作選擇
+  const finalStory = `
+${generatorState.childName} 的冒險故事
+
+${generatorState.story}
+
+[角色現在 ${emotionMap[generatorState.selectedEmotion]}，正在 ${actionMap[generatorState.selectedAction]}]
+  `;
+
+  console.log('完成故事生成：', finalStory);
+
+  // 可以在這裡保存故事或導入到故事閱讀器
+  closeStorybookGenerator();
+
+  // 顯示成功訊息
+  alert('✨ 故事已創建！準備開始閱讀...');
+}
+
+// 快速啟動按鈕（在主頁面添加）
+// <button class="btn btn-primary" onclick="openStorybookGenerator()">為我創建故事</button>
+</script>
+<!-- 包括 <style>, HTML 結構, 和 <script> -->
 </body>
 </html>
