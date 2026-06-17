@@ -320,37 +320,26 @@ footer {
 }
 .modal { position: relative; }
 
-/* ── STORY READER (Glassmorphism 升級版) ── */
+/* ── STORY READER ── */
 #story-reader { display: none; }
 .reader-wrap {
   min-height: 100vh; display: flex; align-items: center; justify-content: center;
   padding: 100px 24px 60px;
 }
 .reader-card {
-  background: rgba(19, 16, 42, 0.65); /* 降低不透明度，透出星空背景 */
-  backdrop-filter: blur(24px); /* 毛玻璃核心特效 */
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(167, 139, 250, 0.25);
-  border-radius: 24px; 
-  max-width: 600px; 
-  width: 100%; 
-  overflow: hidden;
-  /* 柔和外陰影 + 頂部微微的內發光邊緣 */
-  box-shadow: 0 30px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08); 
+  background: var(--deep); border: 1px solid rgba(124,92,191,0.2);
+  border-radius: 24px; max-width: 560px; width: 100%; overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6);
 }
 .reader-header {
-  background: linear-gradient(135deg, rgba(26,16,64,0.5), rgba(42,24,85,0.5));
+  background: linear-gradient(135deg, #1a1040, #2a1855);
   padding: 32px 28px 24px;
 }
 .reader-chapter { font-size: 11px; letter-spacing: 2px; color: var(--lavender); font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
 .reader-scene-art { font-size: 56px; display: block; margin-bottom: 16px; }
 .reader-text {
-  font-family: var(--font-display); 
-  font-size: 17px; /* 稍微放大一點點 */
-  line-height: 2; /* 行距拉大，呼吸感拉滿 */
-  letter-spacing: 0.05em; /* 增加字距 */
-  color: rgba(255, 255, 255, 0.92); /* 微帶灰更護眼 */
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* 讓文字在複雜背景前更清晰 */
+  font-family: var(--font-display); font-size: 16px; line-height: 1.9;
+  color: var(--moon);
 }
 .reader-body { padding: 24px 28px 28px; }
 .reader-voice {
@@ -369,28 +358,13 @@ footer {
 .reader-choices-label { font-size: 12px; color: var(--mist); font-weight: 700; margin-bottom: 10px; letter-spacing: 0.5px; }
 .reader-choices { display: flex; flex-direction: column; gap: 8px; }
 .reader-choice {
-  background: rgba(255,255,255,0.04); 
-  border: 1px solid rgba(255,255,255,0.08);
-  color: var(--moon); 
-  padding: 12px 16px; 
-  border-radius: 12px;
-  font-size: 14px; 
-  cursor: pointer; 
-  text-align: left;
-  font-family: var(--font-body); 
-  font-weight: 600; 
-  display: flex; 
-  align-items: center; 
-  gap: 10px;
-  /* 磁吸微動效 */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  color: var(--moon); padding: 12px 16px; border-radius: 12px;
+  font-size: 14px; cursor: pointer; text-align: left;
+  font-family: var(--font-body); font-weight: 600; transition: all 0.2s;
+  display: flex; align-items: center; gap: 10px;
 }
-.reader-choice:hover { 
-  background: rgba(124,92,191,0.25); 
-  border-color: rgba(167,139,250,0.6); 
-  transform: translateX(6px) scale(1.01); /* 右移加上微放大 */
-  box-shadow: -4px 0 16px rgba(167, 139, 250, 0.15); /* 左側淡淡的光暈 */
-}
+.reader-choice:hover { background: rgba(124,92,191,0.25); border-color: rgba(167,139,250,0.5); transform: translateX(4px); }
 .reader-progress { display: flex; gap: 6px; margin-bottom: 20px; }
 .prog-dot { flex: 1; height: 3px; border-radius: 2px; background: rgba(167,139,250,0.15); }
 .prog-dot.done { background: var(--lavender); }
@@ -530,45 +504,39 @@ footer {
   border-radius: 12px; padding: 16px; margin: 20px 0; font-size: 14px;
   line-height: 1.6; color: var(--mist); min-height: 60px;
 }
-/* 掃光骨架屏特效 */
-.story-preview-box.loading { 
-  position: relative;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.02);
-  color: transparent; 
-}
-.story-preview-box.loading::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.15), transparent);
-  animation: shimmer 1.5s infinite;
-}
-@keyframes shimmer { 100% { transform: translateX(100%); } }
+.story-preview-box.loading { animation: pulse 1.5s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
 /* ── 3D Emoji 小劇場特技動作效果 ── */
-.anim-jump { animation: jumpEffect 0.6s ease-in-out infinite alternate; }
+.anim-jump {
+  animation: jumpEffect 0.6s ease-in-out infinite alternate;
+}
 @keyframes jumpEffect {
   0% { transform: translateY(20px) scale(1.1, 0.9); }
   100% { transform: translateY(-30px) scale(0.9, 1.1); }
 }
 
-.anim-run { animation: runEffect 0.5s linear infinite; }
+.anim-run {
+  animation: runEffect 0.5s linear infinite;
+}
 @keyframes runEffect {
   0% { transform: translateX(-25px) rotate(-8deg); }
   50% { transform: translateX(25px) rotate(8deg); }
   100% { transform: translateX(-25px) rotate(-8deg); }
 }
 
-.anim-dance { animation: danceEffect 1.2s ease-in-out infinite; }
+.anim-dance {
+  animation: danceEffect 1.2s ease-in-out infinite;
+}
 @keyframes danceEffect {
   0%, 100% { transform: scale(1) rotate(0deg); }
   25% { transform: scale(1.15) rotate(12deg) translateY(-8px); }
   75% { transform: scale(1.15) rotate(-12deg) translateY(-8px); }
 }
 
-.anim-float { animation: floatEffect 2s ease-in-out infinite alternate; }
+.anim-float {
+  animation: floatEffect 2s ease-in-out infinite alternate;
+}
 @keyframes floatEffect {
   0% { transform: translateY(8px); }
   100% { transform: translateY(-8px); }
@@ -577,33 +545,46 @@ footer {
 /* ── 5層有機背景舞台特效 ── */
 .story-stage {
   position: relative; width: 100%; height: 100%; overflow: hidden;
+  /* 預設天空背景色 */
   background: linear-gradient(to bottom, #1a1040, #2a1855);
   border-radius: 16px;
 }
 
-.stage-layer { position: absolute; bottom: 0; left: 0; width: 100%; }
+.stage-layer {
+  position: absolute; bottom: 0; left: 0; width: 100%;
+}
 
+/* 第 1 層：天空雲朵 (緩慢平移) */
 .layer-sky {
   top: 10%; font-size: 32px; letter-spacing: 40px; color: rgba(255,255,255,0.2);
-  white-space: nowrap; animation: panSky 40s linear infinite;
+  white-space: nowrap;
+  animation: panSky 40s linear infinite;
 }
 @keyframes panSky {
   0% { transform: translateX(100%); }
   100% { transform: translateX(-100%); }
 }
 
+/* 第 2 層：遠處的樹 (有機微風搖擺，根部固定) */
 .layer-trees {
   height: 50%; font-size: 60px; letter-spacing: 20px; text-align: center;
-  transform-origin: bottom center; 
+  transform-origin: bottom center; /* 讓樹根固定，只有樹梢在晃 */
   animation: swayTrees 4s ease-in-out infinite alternate;
+  /* 💡 未來這裡可以換成: background: url('你的樹木.png') repeat-x bottom; */
 }
 @keyframes swayTrees {
   0% { transform: rotate(-2deg); }
   100% { transform: rotate(3deg); }
 }
 
-.layer-leaves { top: -10%; height: 110%; pointer-events: none; }
-.leaf { position: absolute; font-size: 20px; animation: fallLeaf 5s linear infinite; }
+/* 第 3 層：落葉 (隨機飄落) */
+.layer-leaves {
+  top: -10%; height: 110%; pointer-events: none;
+}
+.leaf {
+  position: absolute; font-size: 20px;
+  animation: fallLeaf 5s linear infinite;
+}
 @keyframes fallLeaf {
   0% { transform: translateY(-20px) rotate(0deg); opacity: 0; }
   10% { opacity: 1; }
@@ -611,22 +592,19 @@ footer {
   100% { transform: translateY(300px) rotate(360deg); opacity: 0; }
 }
 
+/* 第 4 層：前景草地 (靜態或微幅呼吸) */
 .layer-grass {
   height: 30%; 
   background: linear-gradient(to bottom, #2b5e3c, #14301e);
   border-top-left-radius: 50% 20%; border-top-right-radius: 50% 20%;
+  /* 💡 未來這裡可以換成: background: url('你的草地.png') no-repeat bottom; */
 }
 
+/* 第 5 層：主角圖層 (置中) */
 .layer-character {
   display: flex; align-items: flex-end; justify-content: center;
   height: 100%; padding-bottom: 20px; z-index: 10;
 }
-
-/* ── 專屬質感滾動條 ── */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--ink); }
-::-webkit-scrollbar-thumb { background: rgba(124,92,191,0.3); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--violet); }
 </style>
 </head>
 <body>
@@ -1383,7 +1361,6 @@ function selectAction(btn, action) {
 
 async function generateStory() {
   try {
-    // 模擬或真實串接 API
     const response = await fetch('/api/gemini-storybook', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1398,109 +1375,4 @@ async function generateStory() {
     const data = await response.json();
     if (data.story) {
       generatorState.story = data.story;
-      
-      const previewBox = document.getElementById('story-preview');
-      previewBox.classList.remove('loading');
-      document.getElementById('story-loading').classList.remove('active');
-      
-      // ✅ 打字機特效在這裡！
-      previewBox.textContent = ''; 
-      let i = 0;
-      function typeWriter() {
-        if (i < data.story.length) {
-          previewBox.textContent += data.story.charAt(i);
-          i++;
-          setTimeout(typeWriter, 35); // 數字越小打字越快，目前設為每字 35 毫秒
-        }
-      }
-      typeWriter();
-    }
-  } catch (error) {
-    console.error('Story generation error:', error);
-    // 為了測試方便，如果 API 報錯，我們也給一段假資料來展示打字機特效
-    generatorState.story = "（這是一段測試文字）在一個星光閃閃的夜晚，" + generatorState.childName + " 發現床底下的玩具盒發出奇妙的光芒。當他輕輕打開盒子，一隻毛茸茸的小怪獸跳了出來，邀請他去魔法森林探險……";
-    
-    const previewBox = document.getElementById('story-preview');
-    previewBox.classList.remove('loading');
-    document.getElementById('story-loading').classList.remove('active');
-    
-    previewBox.textContent = ''; 
-    let i = 0;
-    function typeWriter() {
-      if (i < generatorState.story.length) {
-        previewBox.textContent += generatorState.story.charAt(i);
-        i++;
-        setTimeout(typeWriter, 35); 
-      }
-    }
-    typeWriter();
-  }
-}
-
-// ✅ [最新升級] 5層有機視差舞台 + 3D Emoji 特效劇院
-async function generateAnimation() {
-  const container = document.getElementById('frame-container');
-  const loading = document.getElementById('anim-loading');
-
-  loading.classList.add('active');
-  container.innerHTML = '';
-
-  const emojiMap = {
-    'jumping': '1f998', 
-    'pointing': '261d', 
-    'running': '1f3c3',  
-    'dancing': '1f483',  
-    'waving': '1f44b',     
-    'laughing': '1f606'  
-  };
-
-  const currentAction = generatorState.selectedAction;
-  let emojiCode = emojiMap[currentAction] || '1f606';
-
-  const emojiUrl = `https://raw.githubusercontent.com/googlefonts/noto-emoji/main/png/512/emoji_u${emojiCode}.png`;
-
-  let animationClass = 'anim-float';
-  if (currentAction === 'jumping') animationClass = 'anim-jump';
-  if (currentAction === 'running') animationClass = 'anim-run';
-  if (currentAction === 'dancing') animationClass = 'anim-dance';
-
-  setTimeout(() => {
-    container.innerHTML = `
-      <div class="story-stage">
-        <div class="stage-layer layer-sky">☁️ ☁️ ☁️ ☁️ ☁️ ☁️</div>
-
-        <div class="stage-layer layer-trees">🌲 🌳 🌲 🌳</div>
-
-        <div class="stage-layer layer-leaves">
-          <div class="leaf" style="left: 15%; animation-duration: 4s; animation-delay: 0s;">🍂</div>
-          <div class="leaf" style="left: 45%; animation-duration: 6s; animation-delay: 1s;">🍃</div>
-          <div class="leaf" style="left: 75%; animation-duration: 5s; animation-delay: 2s;">🍂</div>
-        </div>
-
-        <div class="stage-layer layer-grass"></div>
-
-        <div class="stage-layer layer-character">
-          <img class="${animationClass}" src="${emojiUrl}" style="width: 120px; height: 120px; filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.5));">
-        </div>
-      </div>
-    `;
-    loading.classList.remove('active');
-  }, 800);
-}
-
-function completeGenerator() {
-  const finalStory = `
-${generatorState.childName} 的冒險故事
-
-${generatorState.story}
-
-[角色現在 ${emotionMap[generatorState.selectedEmotion]}，正在 ${actionMap[generatorState.selectedAction]}]
-  `;
-
-  console.log('完成故事生成：', finalStory);
-  closeStorybookGenerator();
-  alert('✨ 故事已創建！快去享受與孩子的溫馨繪本時光吧！');
-}
-</script>
-</body>
-</html>
+      document.getElementById('story-
